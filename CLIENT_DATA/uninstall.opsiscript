@@ -1,0 +1,47 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib gmbh
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/en/credits/
+
+[Actions]
+requiredWinstVersion >= "4.11.4.4"
+
+DefVar $SetupType$
+DefVar $LogDir$
+DefVar $ExitCode$
+DefVar $ErrorMsg$
+
+Defvar $ProductId$
+DefVar $ProductName$
+DefVar $InstallDir$
+DefVar $PathToExe$  
+
+Set $LogDir$ = "%opsiLogDir%"
+Set $SetupType$ = "inno"
+Set $ProductId$		= "winhttrack"
+Set $ProductName$	= "HTTrack Website Copier"
+Set $InstallDir$	= "%ProgramFiles64Dir%\WinHTTrack"
+Set $PathToExe$         = $InstallDir$ + "\WinHTTrack.exe"
+
+DefVar $DesktopLink$
+Set $DesktopLink$       = GetProductProperty("desktop-link","False")
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+	comment "logo at local library/icon found."
+	ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+	comment "no logo at local library/icon, use from ScriptPath ..."
+	ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+endif
+
+
+Message "uninstalling (old) %installingProdName% ..."
+
+if FileExists("%ScriptPath%\delsub.opsiscript")
+   comment "Start uninstall sub section"
+   Sub "%ScriptPath%\delsub.opsiscript"
+else
+	LogError "no DelSub!"
+	isFatalError "no DelSub!"
+endif

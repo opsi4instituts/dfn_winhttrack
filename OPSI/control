@@ -1,0 +1,70 @@
+[Package]
+version: 0.01
+depends: 
+incremental: False
+
+[Product]
+type: localboot
+id: test_winhttrack
+name: WinHTTrack Website Copier
+description: WinHTTrack Website Copier
+advice: 
+version: 3.49.2
+priority: 0
+licenseRequired: False
+productClasses: 
+setupScript: setup.opsiscript
+uninstallScript: uninstall.opsiscript
+updateScript: 
+alwaysScript: 
+onceScript: 
+customScript: 
+userLoginScript: 
+
+[ProductProperty]
+type: bool
+name: desktop-link
+description: Link on Desktop?
+default: False
+
+[ProductProperty]
+type: unicode
+name: minimumspace
+multivalue: False
+editable: True
+description: required hdd space for installation
+values: ["250 MB"]
+default: ["250 MB"]
+
+[ProductProperty]
+type: unicode
+name: custom-post-install
+multivalue: False
+editable: False
+description: Define filename for include script in custom directory after installation
+values: ["none", "post-install.opsiinc"]
+default: ["none"]
+
+[ProductProperty]
+type: unicode
+name: custom-post-deinstall
+multivalue: False
+editable: False
+description: Define filename for include script in custom directory after deinstallation
+values: ["none", "post-deinstall.opsiinc"]
+default: ["none"]
+
+[Changelog]
+winhttrack (3.49.2-002) stable; urgency=low
+
+	* Desktop-Link aus Guidelines eingebaut
+
+ -- Detlef Krummel <opsi4instituts@gei.de>  09/11/2017 09:21:35
+
+winhttrack (3.49.2-001) stable; urgency=low
+	* o4i logo 8/2016
+	* initial: created by opsi-setup-detector with
+	  modified templates
+	* Modifications for CustemDir
+	* Property 'DesktopIcon'
+ -- Detlef Krummel <opsi4instituts@gei.de>  09/11/2017 09:21:35

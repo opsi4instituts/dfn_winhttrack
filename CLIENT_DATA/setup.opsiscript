@@ -1,0 +1,136 @@
+; ----------------------------------------------------------------
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/en/credits/
+; ----------------------------------------------------------------
+; SETUPTYPE      inno
+; PRODUCTID      winhttrack
+; SETUPFILE      httrack_x64-3.49.2.exe
+; LICENSE        false     
+; PRODUCTDESC    WinHTTrack Website Copier 3.49-2 (x64)
+; PRODUCTNAME    WinHTTrack Website Copier
+; PRODUCTSIZE    26 MB
+; PRODUCTVER     3.49.2
+; SETUPSCRIPT    setup.opsiscript
+; UNINSSCRIPT    uninstall.opsiscript
+; INSTALLDIR     %ProgramFilesSysnativeDir%\WinHTTrack
+; TIMESTAMP      09/11/2017 09:21:35
+;****************************************
+
+[Actions]
+requiredWinstVersion >= "4.11.4.4"
+ScriptErrorMessages = false
+
+DefVar $SetupType$
+DefVar $ProductId$ 
+DefVar $ProductName$
+
+DefVar $Setupfile$ 
+DefVar $InstallDir$
+DefVar $PathToExe$
+DefVar $MinimumSpace$
+DefVar $ExitCode$
+DefVar $ErrorMsg$
+
+DefVar $MsiId$
+DefVar $NsisInstallBatch$
+DefVar $LogDir$
+
+Set $LogDir$ = "%opsiLogDir%"
+include_append "%ScriptPath%\check_inno_exitcode.opsiscript"
+
+; ----------------------------------------------------------------
+Set $SetupType$		= "inno"
+Set $ProductId$		= "winhttrack"
+Set $ProductName$	= "HTTrack Website Copier"
+Set $SetupFile$		= "httrack_x64-3.49.2.exe"
+Set $InstallDir$	= "%ProgramFiles64Dir%\WinHTTrack"
+Set $PathToExe$		= $InstallDir$ + "\WinHTTrack.exe"
+
+DefVar  $SetupVersion$
+Set $SetupVersion$      = takeString(0, splitString("%installingProdVersion%","-"))
+Set $SetupFile$         = "httrack_x64-" + $SetupVersion$ + ".exe"
+DefVar $DesktopLink$
+Set $DesktopLink$	= GetProductProperty("desktop-link","False")
+
+; ----------------------------------------------------------------
+
+ChangeDirectory "%SCRIPTPATH%"
+
+Set $MinimumSpace$    = GetProductProperty("minimumspace","26 MB")
+if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
+	LogError "Not enough space on %SystemDrive%, " + $MinimumSpace$ + " on drive %SystemDrive% needed for " + $ProductId$
+	isFatalError "No Space!""
+else
+	comment "Space OK"
+endif
+if not(FileExists($Setupfile$))
+	LogError "Setupfile NOT exists (" + $Setupfile$ +")"
+	isFatalError "No Setupfile!"
+else
+	comment "Setupfile OK (exists)"
+endif
+if GetSystemType = "64 Bit System" AND GetOS = "Windows_NT"
+      comment "Win64Bit= ok"
+else
+      LogError "32 Bit or Linux is not supported for " + $ProductId$
+      isFatalError "Win64Bit only!"
+endif
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+	comment "logo at local library/icons found."
+        ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+        comment "no logo at local library/icons, use from ScriptPath ..."
+        ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+endif
+
+if FileExists("%ScriptPath%\delsub.opsiscript")
+	comment "Start uninstall sub section"
+	Sub "%ScriptPath%\delsub.opsiscript"
+else
+	LogWarning "no DelSub!"
+endif
+   
+Message "installing (new) %installingProdName%(%installingProdVersion%) ..."
+   
+comment "Start setup program"
+Winbatch_install_inno
+Sub_check_exitcode	
+
+if $DesktopLink$ = "True"
+        LinkFolder_create_desktoplink
+endif
+
+comment "include custom post install file"
+DefVar $CustomPostInstall$
+set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+if not ($CustomPostInstall$ = "none")
+        if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+                include_insert "%ScriptPath%\custom\" + $CustomPostInstall$
+        endif
+endif
+
+; ----------------------------------------------------------------
+; install section
+; ----------------------------------------------------------------
+[Winbatch_install_inno]
+; http://unattended.sourceforge.net/InnoSetup_Switches_ExitCodes.html
+; You may create setup answer file by: setup.exe /SAVEINF="filename"
+; You may use an answer file by the parameter /LOADINF="filename"
+"%ScriptPath%\$SetupFile$" /sp- /silent /norestart /nocancel /SUPPRESSMSGBOXES
+
+[LinkFolder_create_desktoplink]
+; create an shortcut to the installed exe on AllUsers desktop:
+set_basefolder common_desktopdirectory
+set_subfolder ""
+set_link
+       name: $ProductName$
+       target: $PathToExe$
+       parameters:
+       working_dir:
+       icon_file:
+       icon_index:
+end_link

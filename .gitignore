@@ -1,0 +1,14 @@
+*.opsi
+*.bak
+*.exe
+opsicheck*.sh
+wget*.sh
+*.md5
+*.zsync
+*.version
+*~
+
+TMP
+TMP/
+info.txt
+winhttrack.png

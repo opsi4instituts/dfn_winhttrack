@@ -1,0 +1,51 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib gmbh
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/en/credits/
+
+include_append "%ScriptPath%\check_inno_exitcode.opsiscript"
+
+DefVar $found$
+DefVar $UninstallProgram$
+
+Set $found$     = "false"
+
+Message "uninstalling (old) %installingProdName% ..."
+
+if ($SetupType$ = "inno")
+   Set $UninstallProgram$ = $InstallDir$ + "\unins000.exe"
+   if (not($InstallDir$ = '')) and FileExists($UninstallProgram$)
+		comment "Uninstall program found, starting uninstall"
+		Winbatch_uninstall_inno
+		sub_check_exitcode
+		comment "include custom post deinstall file"
+		DefVar $CustomPostDeinstall$
+		set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")
+		if not ($CustomPostDeinstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostDeinstall$)
+		                include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
+			endif
+		endif
+   endif
+endif
+
+if $DesktopLink$ = "True"
+        LinkFolder_delete_desktoplink
+endif
+
+if (not($InstallDir$ = '')) and (not($InstallDir$ = "not used"))
+   Files_uninstall
+endif
+
+;-----------------------------------------------------
+[Winbatch_uninstall_inno]
+"$UninstallProgram$" /SILENT /NORESTART
+
+[LinkFolder_delete_desktoplink]
+; delete an shortcut to the installed exe on AllUsers desktop:
+set_basefolder common_desktopdirectory
+set_subfolder ""
+delete_element $ProductName$
+
+[Files_uninstall]
+del -sf "$InstallDir$\"
